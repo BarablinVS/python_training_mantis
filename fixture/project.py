@@ -8,6 +8,12 @@ class ProjectHelper:
     def __init__(self, app):
         self.app = app
 
+
+    def open_project_page(self):
+        wd = self.app.wd
+        wd.find_element_by_link_text("Manage").click()
+        wd.find_element_by_link_text("Manage Projects").click()
+
     def change_field(self, field_name, text):
         wd = self.app.wd
         if text is not None:
@@ -41,11 +47,36 @@ class ProjectHelper:
 
     def create(self, project):
         wd = self.app.wd
-        wd.find_element_by_link_text("Manage").click()
-        wd.find_element_by_link_text("Manage Projects").click()
+        self.open_project_page()
         wd.find_element_by_xpath("//table[3]/tbody/tr[1]/td/form/input[2]").click()
         self.fill_project_form(project)
         wd.find_element_by_xpath("//div[3]/form/table/tbody/tr[7]/td/input").click()
-#        wd.find_element_by_css_selector('input[type="submit"]').click()
-#        self.contact_cache = None
+        self.project_cache = None
+
+    def count(self):
+        wd = self.app.wd
+        self.open_project_page()
+        return len(wd.find_elements_by_xpath('//table[3]/tbody/tr')[2:])
+
+
+    project_cache = None
+
+    def get_project_list(self):
+        if self.project_cache is None:
+            wd = self.app.wd
+            self.open_project_page()
+            self.project_cache = []
+            for element in wd.find_elements_by_xpath('//table[3]/tbody/tr')[2:]:
+                columns = (element.text).split(' ')
+                name = columns[0]
+                status = columns[1]
+                inherit_global = columns[2]
+                view_state = columns[3]
+                description = columns[4]
+                id = (element.find_element_by_css_selector('a').get_attribute("href")).\
+                    replace("http://localhost/mantisbt-1.2.20/manage_proj_edit_page.php?project_id=", "")
+                self.project_cache.append(Project(id=id, name=name, status=status, inherit_global=inherit_global,
+                                                  view_state=view_state, description=description))
+        return list(self.project_cache)
+
 
