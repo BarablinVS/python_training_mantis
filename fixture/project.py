@@ -1,6 +1,7 @@
 __author__ = 'viktor'
 
 from model.project import Project
+import time
 
 
 class ProjectHelper:
@@ -32,9 +33,9 @@ class ProjectHelper:
 
     def change_checkbox_value(self, field_name, text):
         wd = self.app.wd
-        if text == "check":
+        if text == "X":
             pass
-        elif text == "not_check":
+        else:
             wd.find_element_by_name("%s" % field_name).click()
 
     def fill_project_form(self, project):
@@ -53,11 +54,27 @@ class ProjectHelper:
         wd.find_element_by_xpath("//div[3]/form/table/tbody/tr[7]/td/input").click()
         self.project_cache = None
 
+    def delete_project_by_index(self, index):
+        wd = self.app.wd
+        self.open_project_page()
+        wd.find_elements_by_xpath('//a[contains(@href,"manage_proj_edit_page.php?project_id=")]')[index].click()
+        wd.find_element_by_xpath("//div[4]/form/input[3]").click()
+        wd.find_element_by_xpath("//div[2]/form/input[4]").click()
+        self.project_cache = None
+
+    def delete_project_by_id(self, id):
+        wd = self.app.wd
+        self.open_project_page()
+        wd.find_element_by_xpath('//a[contains(@href,"manage_proj_edit_page.php?project_id=%s")]' % id).click()
+        wd.find_element_by_xpath("//div[4]/form/input[3]").click()
+        wd.find_element_by_xpath("//div[2]/form/input[4]").click()
+        self.project_cache = None
+
+
     def count(self):
         wd = self.app.wd
         self.open_project_page()
         return len(wd.find_elements_by_xpath('//table[3]/tbody/tr')[2:])
-
 
     project_cache = None
 
@@ -66,17 +83,22 @@ class ProjectHelper:
             wd = self.app.wd
             self.open_project_page()
             self.project_cache = []
-            for element in wd.find_elements_by_xpath('//table[3]/tbody/tr')[2:]:
-                columns = (element.text).split(' ')
-                name = columns[0]
-                status = columns[1]
-                inherit_global = columns[2]
-                view_state = columns[3]
-                description = columns[4]
-                id = (element.find_element_by_css_selector('a').get_attribute("href")).\
-                    replace("http://localhost/mantisbt-1.2.20/manage_proj_edit_page.php?project_id=", "")
+            i = 1
+            for i in range(self.count()):
+                wd.find_elements_by_xpath('//a[contains(@href,"manage_proj_edit_page.php?project_id=")]')[i].click()
+                id = wd.find_element_by_xpath('//input[@name="project_id"]').get_attribute("value")
+                name = wd.find_element_by_name("name").get_attribute("value")
+                status = (wd.find_element_by_xpath('//select[@name="status"]//option[@selected="selected"]')).text
+                if wd.find_element_by_xpath('//input[@name="inherit_global"]').is_selected():
+                    inherit_global = "X"
+                else:
+                    inherit_global = ""
+                view_state = (wd.find_element_by_xpath('//select[@name="view_state"]//option[@selected="selected"]')).text
+                description = wd.find_element_by_xpath('//textarea[@name="description"]').text
                 self.project_cache.append(Project(id=id, name=name, status=status, inherit_global=inherit_global,
                                                   view_state=view_state, description=description))
+                self.open_project_page()
+                i = i + 1
         return list(self.project_cache)
 
 
