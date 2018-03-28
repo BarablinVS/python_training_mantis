@@ -6,7 +6,6 @@ __author__ = 'viktor'
 
 
 def test_delete_project(app):
-    app.session.login("administrator", "root")
     if app.project.count() == 0:
         app.project.create(Project(name="TestProject28", status="obsolete", inherit_global="X", view_state="public",
                       description="Hello2"))
@@ -20,14 +19,11 @@ def test_delete_project(app):
 
 
 def test_delete_project_by_id(app):
-    app.session.login("administrator", "root")
     if app.project.count() == 0:
         app.project.create(Project(name="TestProject29", status="obsolete", inherit_global="X", view_state="public",
                       description="Hello2"))
     old_projects = app.project.get_project_list()
     project = random.choice(old_projects)
-    print(project)
-    print(project.id)
     app.project.delete_project_by_id(project.id)
     new_projects = app.project.get_project_list()
     assert len(old_projects) - 1 == len(new_projects)

@@ -1,7 +1,7 @@
 from model.project import Project
 
+
 def test_login(app):
-    app.session.login("administrator", "root")
     old_projects = app.project.get_project_list()
     project = Project(name="TestProject27", status="obsolete", inherit_global="X", view_state="public",
                       description="Hello2")
