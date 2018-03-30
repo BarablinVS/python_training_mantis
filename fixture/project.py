@@ -33,9 +33,9 @@ class ProjectHelper:
 
     def change_checkbox_value(self, field_name, text):
         wd = self.app.wd
-        if text == "X":
+        if text == "True":
             pass
-        else:
+        elif text == "False":
             wd.find_element_by_name("%s" % field_name).click()
 
     def fill_project_form(self, project):
@@ -90,9 +90,9 @@ class ProjectHelper:
                 name = wd.find_element_by_name("name").get_attribute("value")
                 status = (wd.find_element_by_xpath('//select[@name="status"]//option[@selected="selected"]')).text
                 if wd.find_element_by_xpath('//input[@name="inherit_global"]').is_selected():
-                    inherit_global = "X"
+                    inherit_global = "True"
                 else:
-                    inherit_global = ""
+                    inherit_global = "False"
                 view_state = (wd.find_element_by_xpath('//select[@name="view_state"]//option[@selected="selected"]')).text
                 description = wd.find_element_by_xpath('//textarea[@name="description"]').text
                 self.project_cache.append(Project(id=id, name=name, status=status, inherit_global=inherit_global,
